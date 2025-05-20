@@ -77,41 +77,6 @@ fun TelaLogin(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val cargos = listOf("Gerente", "Motorista")
-                    cargos.forEach { cargo ->
-                        val isSelecionado = cargoSelecionado == cargo
-
-                        OutlinedButton(
-                            onClick = { viewModel.onCargoSelecionadoChange(cargo) },
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = if (isSelecionado)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.surface,
-                                contentColor = if (isSelecionado)
-                                    MaterialTheme.colorScheme.onPrimary
-                                else
-                                    MaterialTheme.colorScheme.onSurface
-                            ),
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp)
-                        ) {
-                            Text(text = cargo)
-                        }
-                    }
-                }
-
-
-                Spacer(modifier = Modifier.height(24.dp))
-
                 Button(
                     onClick = {viewModel.fazerLogin {
                         onLoginSuccess()

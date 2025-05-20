@@ -15,7 +15,7 @@ import com.example.projetoapprotas.ui.telas.login.LoginViewModel
 import com.example.projetoapprotas.ui.telas.login.TelaLogin
 import com.example.projetoapprotas.ui.theme.ProjetoAppRotasTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
-
+import com.example.projetoapprotas.navigation.AppNavHost
 
 
 class MainActivity : ComponentActivity() {
@@ -23,15 +23,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
-            val loginViewModel: LoginViewModel = viewModel()
-            TelaLogin(
-                viewModel = loginViewModel,
-                onCadastroClick = {
-                },
-                onLoginSuccess = {
-                }
-            )
+            ProjetoAppRotasTheme {
+                AppNavHost()
+            }
         }
     }
 }

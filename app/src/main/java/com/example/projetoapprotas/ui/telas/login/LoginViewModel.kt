@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class LoginViewModel: ViewModel(){
+class LoginViewModel : ViewModel() {
     private val _email = MutableStateFlow("")
     val email = _email.asStateFlow()
 
@@ -14,7 +14,7 @@ class LoginViewModel: ViewModel(){
     private val _cargoSelecionado = MutableStateFlow<String?>(null)
     val cargoSelecionado = _cargoSelecionado.asStateFlow()
 
-    fun onEmailChange(novoEmail: String){
+    fun onEmailChange(novoEmail: String) {
         _email.value = novoEmail
     }
 
@@ -22,21 +22,8 @@ class LoginViewModel: ViewModel(){
         _senha.value = novaSenha
     }
 
-    fun onCargoSelecionadoChange(cargo: String) {
-        _cargoSelecionado.value = cargo
-    }
-
     fun fazerLogin(onSuccess: () -> Unit) {
         // chamada back
-        fun fazerLogin(onSuccess: () -> Unit) {
-            if (
-                email.value.isNotBlank() &&
-                senha.value.length > 5 &&
-                cargoSelecionado.value != null
-            ) {
-                onSuccess()
-            }
-        }
 
     }
 }
