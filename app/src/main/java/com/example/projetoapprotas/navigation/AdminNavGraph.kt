@@ -11,6 +11,8 @@ import com.example.projetoapprotas.ui.telas.admin.TelaAdminHome
 import com.example.projetoapprotas.ui.telas.gerente.TelaCadastroPontos
 import com.example.projetoapprotas.ui.telas.gerente.TelaCadastroRotas
 import com.example.projetoapprotas.ui.telas.gerente.TelaRelatorios
+import android.util.Log
+
 
 fun NavGraphBuilder.adminNavGraph(navController: NavController) {
     navigation(startDestination = "admin_home", route = "admin") {
@@ -23,7 +25,10 @@ fun NavGraphBuilder.adminNavGraph(navController: NavController) {
         }
         composable("admin_cadastro_pontos") {
             TelaCadastroPontos(
-                onVoltarClick = { navController.popBackStack() }
+                onVoltarClick = { navController.popBackStack() },
+                onAdicionarPonto = { Log.d("TelaCadastroPontos", "Botão Adicionar Ponto clicado") }
+
+
             )
         }
         composable("admin_cadastro_rotas") {
