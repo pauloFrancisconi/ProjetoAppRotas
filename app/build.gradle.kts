@@ -63,6 +63,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.navigation:navigation-compose:2.7.0")
+    implementation("org.osmdroid:osmdroid-android:6.1.16")
+
+
 
 
 }

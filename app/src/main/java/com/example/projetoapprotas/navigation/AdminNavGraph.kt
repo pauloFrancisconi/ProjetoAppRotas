@@ -12,6 +12,7 @@ import com.example.projetoapprotas.ui.telas.gerente.TelaCadastroPontos
 import com.example.projetoapprotas.ui.telas.gerente.TelaCadastroRotas
 import com.example.projetoapprotas.ui.telas.gerente.TelaRelatorios
 import android.util.Log
+import com.example.projetoapprotas.ui.telas.gerente.TelaAdicionarPonto
 
 
 fun NavGraphBuilder.adminNavGraph(navController: NavController) {
@@ -26,9 +27,12 @@ fun NavGraphBuilder.adminNavGraph(navController: NavController) {
         composable("admin_cadastro_pontos") {
             TelaCadastroPontos(
                 onVoltarClick = { navController.popBackStack() },
-                onAdicionarPonto = { Log.d("TelaCadastroPontos", "Botão Adicionar Ponto clicado") }
-
-
+                onAdicionarPonto = { navController.navigate("admin_adicionar_ponto") } // navega para a tela adicionar ponto
+            )
+        }
+        composable("admin_adicionar_ponto") {
+            TelaAdicionarPonto(
+                onVoltarClick = { navController.popBackStack() }
             )
         }
         composable("admin_cadastro_rotas") {
