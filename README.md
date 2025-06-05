@@ -55,7 +55,7 @@ com.example.projetoapprotas
 
 2. Abra o projeto no **Android Studio**.
 
-3. Configure um emulador ou dispositivo físico com Android 8.0+ e clique em **Run** ▶️.
+3. Configure um emulador ou dispositivo físico com **Android 8.0+**.
 
 4. Execute o projeto iniciando por:
    ```kotlin
