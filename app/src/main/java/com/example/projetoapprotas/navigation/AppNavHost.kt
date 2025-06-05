@@ -9,9 +9,11 @@ import androidx.navigation.compose.rememberNavController
 fun AppNavHost(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
-        startDestination = "admin"
+        //startDestination = "admin"
+        startDestination = "motorista"
     ) {
 
-        adminNavGraph(navController)
+        //adminNavGraph(navController)
+        motoristaNavGraph(navController)
     }
 }
