@@ -15,7 +15,9 @@ data class EnderecoResponse(
     val gia: String?,
     val ddd: String?,
     val siafi: String?
-)
+) {
+    val erro: Any = TODO()
+}
 
 interface ViaCepService {
     @GET("{cep}/json/")

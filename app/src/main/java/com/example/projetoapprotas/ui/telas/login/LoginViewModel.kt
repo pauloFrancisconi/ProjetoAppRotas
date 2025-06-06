@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class LoginViewModel : ViewModel() {
+    val isLoading = MutableStateFlow(false)
+    val errorMessage = MutableStateFlow("")
     private val _email = MutableStateFlow("")
     val email = _email.asStateFlow()
 
