@@ -173,25 +173,6 @@ fun TelaRotaFinalizadaMotorista(
                         fontWeight = FontWeight.Bold
                     )
                 }
-
-                OutlinedButton(
-                    onClick = onNovaRota,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Nova Rota",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
             }
         }
     }

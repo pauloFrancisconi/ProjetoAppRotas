@@ -30,11 +30,8 @@ fun TelaHomeMotorista(
     onRelatoriosClick: () -> Unit,
     onPerfilClick: () -> Unit = {},
     onConfiguracoesClick: () -> Unit = {},
-    onHistoricoClick: () -> Unit = {},
     onSobreClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
-    onSemRotaClick: () -> Unit,
-    onRotaFinalizadaClick: () -> Unit,
     nomeMotorista: String = "João Silva"
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -65,10 +62,6 @@ fun TelaHomeMotorista(
                     scope.launch { drawerState.close() }
                     onRelatoriosClick()
                 },
-                onHistoricoClick = {
-                    scope.launch { drawerState.close() }
-                    onHistoricoClick()
-                },
                 onConfiguracoesClick = {
                     scope.launch { drawerState.close() }
                     onConfiguracoesClick()
@@ -80,14 +73,6 @@ fun TelaHomeMotorista(
                 onLogoutClick = {
                     scope.launch { drawerState.close() }
                     onLogoutClick()
-                },
-                onSemRotaClick = {
-                    scope.launch { drawerState.close() }
-                    onSemRotaClick()
-                },
-                onRotaFinalizadaClick = {
-                    scope.launch { drawerState.close() }
-                    onRotaFinalizadaClick()
                 }
             )
         }
@@ -200,12 +185,9 @@ fun DrawerContent(
     onPerfilClick: () -> Unit,
     onRotaDiaClick: () -> Unit,
     onRelatoriosClick: () -> Unit,
-    onHistoricoClick: () -> Unit,
     onConfiguracoesClick: () -> Unit,
     onSobreClick: () -> Unit,
-    onLogoutClick: () -> Unit,
-    onSemRotaClick: () -> Unit,
-    onRotaFinalizadaClick: () -> Unit
+    onLogoutClick: () -> Unit
 ) {
     ModalDrawerSheet(
         modifier = Modifier.width(320.dp)
@@ -257,12 +239,6 @@ fun DrawerContent(
 
         // Itens do menu principal
         DrawerMenuItem(
-            icon = Icons.Default.Person,
-            title = "Meu Perfil",
-            onClick = onPerfilClick
-        )
-
-        DrawerMenuItem(
             icon = Icons.Default.Place,
             title = "Rota do Dia",
             onClick = onRotaDiaClick
@@ -274,27 +250,16 @@ fun DrawerContent(
             onClick = onRelatoriosClick
         )
 
-        DrawerMenuItem(
-            icon = Icons.Default.Search,
-            title = "Histórico",
-            onClick = onHistoricoClick
-        )
-
-        DrawerMenuItem(
-            icon = Icons.Default.Menu,
-            title = "Sem Rota",
-            onClick = onSemRotaClick
-        )
-
-        DrawerMenuItem(
-            icon = Icons.Default.Menu,
-            title = "Rota Finalizada",
-            onClick = onRotaFinalizadaClick
-        )
-
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        )
+
+        // Meu Perfil (abaixo da linha)
+        DrawerMenuItem(
+            icon = Icons.Default.Person,
+            title = "Meu Perfil",
+            onClick = onPerfilClick
         )
 
         // Itens secundários
@@ -564,8 +529,7 @@ fun TelaHomeMotoristaProfissionalPreview() {
         TelaHomeMotorista(
             onRotaDiaClick = {},
             onRelatoriosClick = {},
-            onSemRotaClick = {},
-            onRotaFinalizadaClick = {}
+            onLogoutClick = {}
         )
     }
 }

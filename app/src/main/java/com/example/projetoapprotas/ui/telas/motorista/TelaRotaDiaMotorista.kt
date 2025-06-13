@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TelaRotaDiaMotorista(
-    onEnviarFoto: (pontoId: String) -> Unit = {},
+    onEnviarFoto: (pontoId: String, nomePonto: String) -> Unit = { _, _ -> },
     onRegistrarPonto: (pontoId: String) -> Unit = {},
     onFinalizarRota: () -> Unit = {},
     onVoltarClick: () -> Unit = {}
@@ -129,7 +129,7 @@ fun TelaRotaDiaMotorista(
                 items(pontosState) { ponto ->
                     PontoRotaCard(
                         ponto = ponto,
-                        onEnviarFoto = { onEnviarFoto(ponto.id) },
+                        onEnviarFoto = { onEnviarFoto(ponto.id, ponto.nome) },
                         onRegistrarPonto = {
                             pontosState = pontosState.map {
                                 if (it.id == ponto.id) it.copy(concluido = true) else it
@@ -189,7 +189,7 @@ fun PontoRotaCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (ponto.concluido)
-                Color(0xFF4CAF50).copy(alpha = 0.1f)
+                Color(0xFFF5F5F5) // Fundo cinza claro para pontos concluídos
             else
                 MaterialTheme.colorScheme.surface
         ),
@@ -216,12 +216,18 @@ fun PontoRotaCard(
                         text = ponto.nome,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = if (ponto.concluido)
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        else
+                            MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = ponto.endereco,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        color = if (ponto.concluido)
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                 }
 
@@ -235,13 +241,55 @@ fun PontoRotaCard(
                 }
             }
 
-            if (!ponto.concluido) {
-                Spacer(modifier = Modifier.height(16.dp))
+            // Sempre mostrar o espaçamento e a row de botões para manter o tamanho consistente
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (ponto.concluido) {
+                    // Botões desabilitados para pontos concluídos
+                    OutlinedButton(
+                        onClick = { }, // Não faz nada quando clicado
+                        enabled = false,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            disabledContentColor = Color.Gray.copy(alpha = 0.5f),
+                            disabledContainerColor = Color.Transparent
+                        ),
+                        border = null
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Foto")
+                    }
+
+                    Button(
+                        onClick = { }, // Não faz nada quando clicado
+                        enabled = false,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            disabledContentColor = Color.White.copy(alpha = 0.7f),
+                            disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Concluir")
+                    }
+                } else {
+                    // Botões ativos para pontos não concluídos
                     OutlinedButton(
                         onClick = onEnviarFoto,
                         modifier = Modifier.weight(1f),

@@ -13,14 +13,14 @@ import com.example.projetoapprotas.ui.telas.login.TelaLogin
 fun AppNavHost(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
-        startDestination = "admin"       // Para testar telas do admin
-        //startDestination = "motorista" // Para testar telas do motorista
+        //startDestination = "admin"       // Para testar telas do admin
+        startDestination = "motorista" // Para testar telas do motorista
         //startDestination = "login"     // Para testar o Login
     )
     {
 
-        adminNavGraph(navController)
-        //motoristaNavGraph(navController)
+        //adminNavGraph(navController)
+        motoristaNavGraph(navController)
     }
 
 //    {
