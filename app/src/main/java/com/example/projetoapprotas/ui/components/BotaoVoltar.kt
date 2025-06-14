@@ -12,14 +12,13 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun BotaoVoltar(
-    onVoltarClick: () -> Unit,
-    texto: String = "Voltar"
+    onVoltarClick: () -> Unit
 ) {
     FilledTonalButton(
         onClick = onVoltarClick,
         modifier = Modifier
             .padding(WindowInsets.statusBars.asPaddingValues())
-            .padding(8.dp),
+            .padding(4.dp),
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
             contentColor = MaterialTheme.colorScheme.primary
@@ -29,7 +28,6 @@ fun BotaoVoltar(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Voltar"
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = texto)
+        Spacer(modifier = Modifier.width(4.dp))
     }
 }
