@@ -1,473 +1,233 @@
+/* ui/telas/gerente/TelaAdicionarPonto.kt */
 package com.example.projetoapprotas.ui.telas.gerente
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.projetoapprotas.service.EnderecoResponse
-import com.example.projetoapprotas.service.ViaCepService
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.projetoapprotas.data.remote.RetrofitFactory
+import com.example.projetoapprotas.data.repository.PontoRepository
 import com.example.projetoapprotas.ui.componentes.BotaoVoltar
-import kotlinx.coroutines.delay
+import com.example.projetoapprotas.viewmodel.AdicionarPontoViewModel
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TelaAdicionarPonto(
+    baseCepUrl: String = "https://viacep.com.br/ws/",
     onVoltarClick: () -> Unit,
     onPontoSalvo: () -> Unit = {}
 ) {
-    var cep by remember { mutableStateOf("") }
-    var nome by remember { mutableStateOf("") }
-    var descricao by remember { mutableStateOf("") }
-    var observacoes by remember { mutableStateOf("") }
-    var coordenadas by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
-    var isSaving by remember { mutableStateOf(false) }
-    var erro by remember { mutableStateOf<String?>(null) }
-    var successMessage by remember { mutableStateOf<String?>(null) }
-    var enderecoCompleto by remember { mutableStateOf("") }
-
-    val focusManager = LocalFocusManager.current
-    val scrollState = rememberScrollState()
-
-    val retrofit = remember {
-        Retrofit.Builder()
-            .baseUrl("https://viacep.com.br/ws/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+    val cepApi = remember(baseCepUrl) {
+        RetrofitFactory.createViaCepService(baseCepUrl)
     }
+    val repo = remember { PontoRepository(cepApi) }
+    val viewModel: AdicionarPontoViewModel =
+        viewModel(factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(c: Class<T>): T = AdicionarPontoViewModel(repo) as T
+        })/* -------------------------------------------------------------- */
 
-    val service = remember { retrofit.create(ViaCepService::class.java) }
+    val uiState by viewModel.state.collectAsState()
+    val scroll = rememberScrollState()
+    val focus = LocalFocusManager.current
+    val scope = rememberCoroutineScope()
 
-    val isFormValid = nome.isNotBlank() &&
-            descricao.isNotBlank() &&
-            cep.length == 8 &&
-            enderecoCompleto.isNotBlank()
-
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
+    Scaffold(topBar = {
+        CenterAlignedTopAppBar(
+            navigationIcon = { BotaoVoltar(onVoltarClick) },
+            title = { Text("Cadastro de Ponto") })
+    }) { padding ->
         Column(
             modifier = Modifier
+                .padding(padding)
                 .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                )
+                .verticalScroll(scroll)
+                .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
-            // Header com botão voltar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BotaoVoltar(onVoltarClick)
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "Cadastro de Ponto",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = 24.dp)
-            ) {
-                // Card principal do formulário
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(8.dp, RoundedCornerShape(16.dp)),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
-                    ) {
-                        // Título do formulário
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Place,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Informações do Ponto",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                        )
-
-                        // Seção de localização
-                        Text(
-                            text = "LOCALIZAÇÃO",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        // Campo CEP
+            /* ----------------------- Formulário -------------------- */
+            Card(shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(6.dp)) {
+                Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
                         OutlinedTextField(
-                            value = cep,
-                            onValueChange = {
-                                if (it.length <= 8 && it.all { char -> char.isDigit() }) {
-                                    cep = it
-                                    erro = null
-                                    successMessage = null
-                                }
-                            },
-                            label = { Text("CEP") },
-                            placeholder = { Text("12345678") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.NumberPassword,
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = { focusManager.clearFocus() }
-                            ),
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.LocationOn,
-                                    contentDescription = "CEP",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                            )
-                        )
+                        value = uiState.cep,
+                        onValueChange = viewModel::onCepChange,
+                        label = { Text("CEP") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
+                        leadingIcon = { Icon(Icons.Default.LocationOn, null) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                        // Botão buscar endereço
-                        Button(
-                            onClick = {
-                                if (cep.length == 8) {
-                                    isLoading = true
-                                    erro = null
-                                    successMessage = null
-
-                                    service.buscarEndereco(cep).enqueue(object : Callback<EnderecoResponse> {
-                                        override fun onResponse(
-                                            call: Call<EnderecoResponse>,
-                                            response: Response<EnderecoResponse>
-                                        ) {
-                                            isLoading = false
-                                            if (response.isSuccessful) {
-                                                val endereco = response.body()
-                                                if (endereco?.erro == null) {
-                                                    nome = endereco?.logradouro ?: ""
-                                                    enderecoCompleto = listOfNotNull(
-                                                        endereco?.logradouro,
-                                                        endereco?.bairro,
-                                                        endereco?.localidade,
-                                                        endereco?.uf
-                                                    ).joinToString(", ")
-                                                    descricao = "${endereco?.bairro}, ${endereco?.localidade} - ${endereco?.uf}"
-                                                    successMessage = "Endereço encontrado com sucesso!"
-                                                } else {
-                                                    erro = "CEP não encontrado"
-                                                }
-                                            } else {
-                                                erro = "CEP inválido ou não encontrado"
-                                            }
-                                        }
-
-                                        override fun onFailure(call: Call<EnderecoResponse>, t: Throwable) {
-                                            isLoading = false
-                                            erro = "Erro de conexão. Verifique sua internet."
-                                        }
-                                    })
-                                } else {
-                                    erro = "CEP deve conter 8 dígitos"
-                                }
-                            },
-                            enabled = cep.length == 8 && !isLoading,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            if (isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    strokeWidth = 2.dp
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Buscando...")
-                            } else {
-                                Icon(
-                                    Icons.Default.Search,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Buscar Endereço")
-                            }
-                        }
-
-                        // Mensagens de erro e sucesso
-                        erro?.let { errorMsg ->
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer
-                                ),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        Icons.Default.Warning,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onErrorContainer,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = errorMsg,
-                                        color = MaterialTheme.colorScheme.onErrorContainer,
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-                            }
-                        }
-
-                        successMessage?.let { successMsg ->
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color(0xFF4CAF50).copy(alpha = 0.1f)
-                                ),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        Icons.Default.CheckCircle,
-                                        contentDescription = null,
-                                        tint = Color(0xFF4CAF50),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = successMsg,
-                                        color = Color(0xFF2E7D32),
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-                            }
-                        }
-
-                        // Seção de detalhes
-                        Text(
-                            text = "DETALHES DO PONTO",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        // Nome do ponto
-                        OutlinedTextField(
-                            value = nome,
-                            onValueChange = { nome = it },
-                            label = { Text("Nome do Ponto") },
-                            placeholder = { Text("Ex: Rua das Flores, 123") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                            ),
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Edit,
-                                    contentDescription = "Nome",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                            )
-                        )
-
-                        // Descrição/Localização
-                        OutlinedTextField(
-                            value = descricao,
-                            onValueChange = { descricao = it },
-                            label = { Text("Descrição/Localização") },
-                            placeholder = { Text("Bairro, Cidade - Estado") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                            ),
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.LocationOn,
-                                    contentDescription = "Descrição",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                            )
-                        )
-
-                        // Observações
-                        OutlinedTextField(
-                            value = observacoes,
-                            onValueChange = { observacoes = it },
-                            label = { Text("Observações (Opcional)") },
-                            placeholder = { Text("Informações adicionais sobre o ponto") },
-                            maxLines = 3,
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = { focusManager.clearFocus() }
-                            ),
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Info,
-                                    contentDescription = "Observações",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                            )
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Botões de ação
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Botão cancelar
-                    OutlinedButton(
-                        onClick = onVoltarClick,
-                        modifier = Modifier.weight(1f).height(56.dp),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Cancelar",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-
-                    // Botão salvar
                     Button(
-                        onClick = {
-                            isSaving = true
-                            // Simular salvamento
-                            println("Salvando ponto: nome=$nome, desc=$descricao, cep=$cep, obs=$observacoes")
-
-                            // Aqui você implementaria a lógica de salvamento real
-                            // Por enquanto, apenas simula um delay e chama o callback
-                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
-                                delay(1000) // Simula operação
-                                isSaving = false
-                                onPontoSalvo()
-                            }
-                        },
-                        enabled = isFormValid && !isSaving,
-                        modifier = Modifier.weight(1f).height(56.dp),
+                        onClick = { viewModel.buscarEndereco() },
+                        enabled = uiState.canSearchCep,
+                        modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        if (isSaving) {
+                        if (uiState.loadingCep) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(20.dp),
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 strokeWidth = 2.dp
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Salvando...")
+                            Spacer(Modifier.width(8.dp))
+                            Text("Buscando…")
                         } else {
-                            Icon(
-                                Icons.Default.Check,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Salvar Ponto",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            Icon(Icons.Default.Search, null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Buscar Endereço")
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                   OutlinedTextField(
+                        value = uiState.nome,
+                        onValueChange = viewModel::onNomeChange,
+                        label = { Text("Nome do Ponto") },
+                        leadingIcon = { Icon(Icons.Default.Edit, null) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions {
+                            focus.moveFocus(FocusDirection.Down)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = uiState.descricao,
+                        onValueChange = viewModel::onDescricaoChange,
+                        label = { Text("Descrição/Localização") },
+                        leadingIcon = { Icon(Icons.Default.Info, null) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions {
+                            focus.moveFocus(FocusDirection.Down)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                     OutlinedTextField(
+                        value = uiState.observacoes,
+                        onValueChange = viewModel::onObservacoesChange,
+                        label = { Text("Observações (Opcional)") },
+                        leadingIcon = { Icon(Icons.Default.Info, null) },
+                        maxLines = 3,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    uiState.error?.let { mensagem ->
+                        AssistChip(
+                            onClick = viewModel::dismissMessage,
+                            label = { Text(mensagem) },
+                            leadingIcon = { Icon(Icons.Default.Warning, null) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                labelColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        )
+                    }
+
+                    uiState.sucesso?.let { mensagem ->
+                        AssistChip(
+                            onClick = viewModel::dismissMessage,
+                            label = { Text(mensagem) },
+                            leadingIcon = { Icon(Icons.Default.CheckCircle, null) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = Color(0xFF4CAF50).copy(alpha = .15f),
+                                labelColor = Color(0xFF256029)
+                            )
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(
+                    onClick = onVoltarClick, modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                ) { Text("Cancelar") }
+
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val ok = viewModel.salvarPonto()
+                            if (ok) onPontoSalvo()
+                        }
+                    },
+                    enabled = uiState.formValido && !uiState.salvando,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                ) {
+                    if (uiState.salvando) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text("Salvando…")
+                    } else {
+                        Icon(Icons.Default.Check, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Salvar Ponto")
+                    }
+                }
             }
         }
     }
