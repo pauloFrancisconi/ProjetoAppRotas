@@ -1,25 +1,10 @@
-package com.example.projetoapprotas.service
+package com.example.projetoapprotas.data.remote.service
 
+import com.example.projetoapprotas.data.remote.dto.AddressDto
 import retrofit2.http.GET
 import retrofit2.http.Path
-import retrofit2.Call
 
-data class EnderecoResponse(
-    val cep: String?,
-    val logradouro: String?,
-    val complemento: String?,
-    val bairro: String?,
-    val localidade: String?,
-    val uf: String?,
-    val ibge: String?,
-    val gia: String?,
-    val ddd: String?,
-    val siafi: String?
-) {
-    val erro: Any = TODO()
-}
-
-interface ViaCepService {
+interface ViaCepApi {
     @GET("{cep}/json/")
-    fun buscarEndereco(@Path("cep") cep: String): Call<EnderecoResponse>
+    suspend fun getAddress(@Path("cep") cep: String): AddressDto
 }
