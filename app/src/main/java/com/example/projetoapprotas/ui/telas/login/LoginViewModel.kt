@@ -25,6 +25,12 @@ class LoginViewModel : ViewModel() {
     private val _cargoSelecionado = MutableStateFlow<String?>(null)
     val cargoSelecionado = _cargoSelecionado.asStateFlow()
 
+    fun clearLoginData() {
+        _email.value = ""
+        _senha.value = ""
+        errorMessage.value = ""
+    }
+
     fun onEmailChange(novoEmail: String) {
         _email.value = novoEmail
     }
@@ -44,7 +50,7 @@ class LoginViewModel : ViewModel() {
         val senhaInserida = senha.value.trim()
 
         val mockUsuarios = listOf(
-            UsuarioMockado("joao.silva@gmail.com", "1234", "motorista", "João"),
+            UsuarioMockado("joao.silva@gmail.com", "1234", "motorista", "João Silva"),
             UsuarioMockado("carlos.lima@gmail.com", "admin", "admin", "Carlos")
         )
 

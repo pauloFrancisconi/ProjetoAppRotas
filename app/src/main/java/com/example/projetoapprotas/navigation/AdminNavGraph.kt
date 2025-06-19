@@ -12,16 +12,35 @@ import com.example.projetoapprotas.ui.telas.gerente.TelaCadastroPontos
 import com.example.projetoapprotas.ui.telas.gerente.TelaCadastroRotas
 import com.example.projetoapprotas.ui.telas.gerente.TelaCriarRota
 import com.example.projetoapprotas.ui.telas.gerente.TelaRelatorios
+import com.example.projetoapprotas.ui.telas.login.LoginViewModel
 import android.util.Log
 import com.example.projetoapprotas.ui.telas.gerente.TelaAdicionarPonto
 
-fun NavGraphBuilder.adminNavGraph(navController: NavController) {
+fun NavGraphBuilder.adminNavGraph(
+    navController: NavController,
+    loginViewModel: LoginViewModel? = null
+    ) {
     navigation(startDestination = "admin_home", route = "admin") {
         composable("admin_home") {
             TelaAdminHome(
                 onCadastroPontosClick = { navController.navigate("admin_cadastro_pontos") },
                 onCadastroRotasClick = { navController.navigate("admin_cadastro_rotas") },
-                onRelatoriosClick = { navController.navigate("admin_relatorios") }
+                onRelatoriosClick = { navController.navigate("admin_relatorios") },
+                onLogoutClick = {
+
+                    loginViewModel?.let { viewModel ->
+                        viewModel.clearLoginData()
+                    }
+
+                    // Navega para login limpando todo o stack
+                    navController.navigate("login") {
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                        restoreState = false
+                    }
+                }
             )
         }
 

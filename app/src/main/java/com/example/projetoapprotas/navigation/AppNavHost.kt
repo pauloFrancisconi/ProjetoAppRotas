@@ -33,7 +33,13 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
         }
 
         // NavGraphs
-        adminNavGraph(navController)
-        motoristaNavGraph(navController)
+        adminNavGraph(
+            navController = navController,
+            loginViewModel = loginViewModel
+        )
+        motoristaNavGraph(
+            navController = navController,
+            loginViewModel = loginViewModel
+        )
     }
 }

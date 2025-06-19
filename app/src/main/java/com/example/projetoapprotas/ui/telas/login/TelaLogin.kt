@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
@@ -31,6 +32,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +42,7 @@ fun TelaLogin(
     onCadastroClick: () -> Unit = {},
     onLoginSuccess: (String) -> Unit = {},
 ) {
-    val context = LocalContext.current // ADICIONADO AQUI
+    val context = LocalContext.current
 
     val email by viewModel.email.collectAsState()
     val senha by viewModel.senha.collectAsState()
@@ -77,24 +80,29 @@ fun TelaLogin(
                     .padding(horizontal = 32.dp, vertical = 48.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Logo
+                // Logo com imagem
                 Card(
                     modifier = Modifier
-                        .size(80.dp)
+                        .size(120.dp) // Aumentei um pouco o tamanho para a logo
                         .shadow(8.dp, RoundedCornerShape(16.dp)),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Logo",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data("https://i.ibb.co/mVzVrq9m/LOGO.png")
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "Logo PontuAll",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(12.dp), // Padding interno para não colar nas bordas
+                            contentScale = ContentScale.Fit
                         )
                     }
                 }
@@ -140,7 +148,7 @@ fun TelaLogin(
                         OutlinedTextField(
                             value = email,
                             onValueChange = { viewModel.onEmailChange(it) },
-                            label = { Text("Email corporativo") },
+                            label = { Text("Email") },
                             placeholder = { Text("usuario@empresa.com") },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
@@ -184,7 +192,7 @@ fun TelaLogin(
                                     focusManager.clearFocus()
                                     if (isLoginEnabled) {
                                         viewModel.fazerLogin(
-                                            context = context, // FIX AQUI
+                                            context = context,
                                             onSuccess = { cargo ->
                                                 onLoginSuccess(cargo)
                                             },
@@ -202,19 +210,6 @@ fun TelaLogin(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             },
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = { passwordVisible = !passwordVisible }
-                                ) {
-                                    Icon(
-                                        imageVector = if (passwordVisible)
-                                            Icons.Default.Info else Icons.Default.AccountCircle,
-                                        contentDescription = if (passwordVisible)
-                                            "Ocultar senha" else "Mostrar senha",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -228,7 +223,7 @@ fun TelaLogin(
                         Button(
                             onClick = {
                                 viewModel.fazerLogin(
-                                    context = context, // FIX AQUI
+                                    context = context,
                                     onSuccess = { cargo ->
                                         onLoginSuccess(cargo)
                                     },
@@ -283,47 +278,6 @@ fun TelaLogin(
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                    )
-                    Text(
-                        text = "OU",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                val annotatedText = buildAnnotatedString {
-                    append("Não possui acesso? ")
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        append("Solicitar Cadastro")
-                    }
-                }
-
-                Text(
-                    text = annotatedText,
-                    modifier = Modifier.clickable { onCadastroClick() },
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 

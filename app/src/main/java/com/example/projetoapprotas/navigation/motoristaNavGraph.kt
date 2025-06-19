@@ -16,9 +16,13 @@ import com.example.projetoapprotas.ui.telas.motorista.TelaConfiguracoes
 import com.example.projetoapprotas.ui.telas.motorista.TelaSobre
 import com.example.projetoapprotas.ui.telas.motorista.TelaPerfilMotorista
 import com.example.projetoapprotas.ui.telas.motorista.TelaRelatoriosMotorista
+import com.example.projetoapprotas.ui.telas.login.LoginViewModel
 import androidx.core.content.edit
 
-fun NavGraphBuilder.motoristaNavGraph(navController: NavController) {
+fun NavGraphBuilder.motoristaNavGraph(
+    navController: NavController,
+    loginViewModel: LoginViewModel? = null
+) {
     navigation(startDestination = "motorista_home", route = "motorista") {
         composable("motorista_home") {
             val context = LocalContext.current
@@ -29,15 +33,24 @@ fun NavGraphBuilder.motoristaNavGraph(navController: NavController) {
                 onConfiguracoesClick = { navController.navigate("motorista_configuracoes") },
                 onSobreClick = { navController.navigate("motorista_sobre") },
                 onLogoutClick = {
+                    // Limpa os dados do LoginViewModel
+                    loginViewModel?.let { viewModel ->
+                        viewModel.clearLoginData()
+                    }
+
                     // Limpar SharedPreferences
-                    context.getSharedPreferences("usuario_prefs", Context.MODE_PRIVATE) //context esta em vermelho
+                    context.getSharedPreferences("usuario_prefs", Context.MODE_PRIVATE)
                         .edit() {
                             clear()
                         }
 
-                    // Navegar para login limpando backstack
+                    // Navegar para login limpando todo o stack
                     navController.navigate("login") {
-                        popUpTo("motorista") { inclusive = true }
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                        restoreState = false
                     }
                 }
             )
