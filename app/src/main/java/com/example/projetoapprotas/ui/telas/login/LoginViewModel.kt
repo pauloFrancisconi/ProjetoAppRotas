@@ -24,8 +24,38 @@ class LoginViewModel : ViewModel() {
         _senha.value = novaSenha
     }
 
-    fun fazerLogin(onSuccess: () -> Unit) {
-        // chamada back
+    fun fazerLogin(
+        onSuccess: (String) -> Unit, // envia a rota desejada
+        onError: (String) -> Unit
+    ) {
+        isLoading.value = true
 
+        val emailInserido = email.value.trim()
+        val senhaInserida = senha.value.trim()
+
+        // Mock de usuários
+        val mockUsuarios = listOf(
+            Triple("Borges@gmail.com", "1234", "motorista"),
+            Triple("Lucas@gmail.com", "admin", "admin")
+        )
+
+        val usuarioValido = mockUsuarios.find { (login, senha, _) ->
+            emailInserido == login && senhaInserida == senha
+        }
+
+        if (usuarioValido != null) {
+            val (_, _, cargo) = usuarioValido
+            isLoading.value = false
+            onSuccess(cargo) // "admin" ou "motorista"
+        } else {
+            isLoading.value = false
+            onError("Usuário ou senha inválidos")
+        }
     }
+
+    fun setErrorMessage(message: String) {
+        errorMessage.value = message
+    }
+
+
 }

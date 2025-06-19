@@ -36,8 +36,7 @@ import androidx.compose.ui.unit.dp
 fun TelaLogin(
     viewModel: LoginViewModel,
     onCadastroClick: () -> Unit = {},
-    onLoginSuccess: () -> Unit = {},
-    onEsqueceuSenhaClick: () -> Unit = {}
+    onLoginSuccess: (String) -> Unit = {},
 ) {
     val email by viewModel.email.collectAsState()
     val senha by viewModel.senha.collectAsState()
@@ -99,7 +98,6 @@ fun TelaLogin(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Título principal
                 Text(
                     text = "Acesso ao Sistema",
                     style = MaterialTheme.typography.headlineMedium,
@@ -118,7 +116,6 @@ fun TelaLogin(
 
                 Spacer(modifier = Modifier.height(48.dp))
 
-                // Card principal com formulário
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -137,7 +134,6 @@ fun TelaLogin(
                             .padding(32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Campo de email
                         OutlinedTextField(
                             value = email,
                             onValueChange = { viewModel.onEmailChange(it) },
@@ -168,7 +164,6 @@ fun TelaLogin(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        // Campo de senha
                         OutlinedTextField(
                             value = senha,
                             onValueChange = { viewModel.onSenhaChange(it) },
@@ -185,7 +180,14 @@ fun TelaLogin(
                                 onDone = {
                                     focusManager.clearFocus()
                                     if (isLoginEnabled) {
-                                        viewModel.fazerLogin { onLoginSuccess() }
+                                        viewModel.fazerLogin(
+                                            onSuccess = { cargo ->
+                                                onLoginSuccess(cargo)
+                                            },
+                                            onError = { erro ->
+                                                viewModel.setErrorMessage(erro)
+                                            }
+                                        )
                                     }
                                 }
                             ),
@@ -217,28 +219,18 @@ fun TelaLogin(
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Link "Esqueceu a senha?"
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Text(
-                                text = "Esqueceu a senha?",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.clickable { onEsqueceuSenhaClick() },
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        // Botão de login
                         Button(
                             onClick = {
-                                viewModel.fazerLogin { onLoginSuccess() }
+                                viewModel.fazerLogin(
+                                    onSuccess = { cargo ->
+                                        onLoginSuccess(cargo)
+                                    },
+                                    onError = { erro ->
+                                        viewModel.setErrorMessage(erro) //set error message vermelho
+                                    }
+                                )
                             },
                             enabled = isLoginEnabled,
                             modifier = Modifier
@@ -265,7 +257,6 @@ fun TelaLogin(
                             }
                         }
 
-                        // Mensagem de erro
                         if (errorMessage.isNotBlank()) {
                             Spacer(modifier = Modifier.height(16.dp))
                             Card(
@@ -288,7 +279,6 @@ fun TelaLogin(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Divisor
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -311,7 +301,6 @@ fun TelaLogin(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Link para cadastro
                 val annotatedText = buildAnnotatedString {
                     append("Não possui acesso? ")
                     withStyle(
@@ -333,7 +322,6 @@ fun TelaLogin(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Rodapé
                 Text(
                     text = "© 2025 PontuAll. Todos os direitos reservados.",
                     style = MaterialTheme.typography.bodySmall,
