@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -38,6 +39,8 @@ fun TelaLogin(
     onCadastroClick: () -> Unit = {},
     onLoginSuccess: (String) -> Unit = {},
 ) {
+    val context = LocalContext.current // ADICIONADO AQUI
+
     val email by viewModel.email.collectAsState()
     val senha by viewModel.senha.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -74,7 +77,7 @@ fun TelaLogin(
                     .padding(horizontal = 32.dp, vertical = 48.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Logo/Título da empresa
+                // Logo
                 Card(
                     modifier = Modifier
                         .size(80.dp)
@@ -181,6 +184,7 @@ fun TelaLogin(
                                     focusManager.clearFocus()
                                     if (isLoginEnabled) {
                                         viewModel.fazerLogin(
+                                            context = context, // FIX AQUI
                                             onSuccess = { cargo ->
                                                 onLoginSuccess(cargo)
                                             },
@@ -224,11 +228,12 @@ fun TelaLogin(
                         Button(
                             onClick = {
                                 viewModel.fazerLogin(
+                                    context = context, // FIX AQUI
                                     onSuccess = { cargo ->
                                         onLoginSuccess(cargo)
                                     },
                                     onError = { erro ->
-                                        viewModel.setErrorMessage(erro) //set error message vermelho
+                                        viewModel.setErrorMessage(erro)
                                     }
                                 )
                             },

@@ -1,12 +1,21 @@
 package com.example.projetoapprotas.ui.telas.login
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+data class UsuarioMockado(
+    val email: String,
+    val senha: String,
+    val tipo: String,
+    val nome: String
+)
+
 class LoginViewModel : ViewModel() {
     val isLoading = MutableStateFlow(false)
     val errorMessage = MutableStateFlow("")
+
     private val _email = MutableStateFlow("")
     val email = _email.asStateFlow()
 
@@ -25,6 +34,7 @@ class LoginViewModel : ViewModel() {
     }
 
     fun fazerLogin(
+        context: Context,
         onSuccess: (String) -> Unit, // envia a rota desejada
         onError: (String) -> Unit
     ) {
@@ -33,29 +43,39 @@ class LoginViewModel : ViewModel() {
         val emailInserido = email.value.trim()
         val senhaInserida = senha.value.trim()
 
-        // Mock de usuários
         val mockUsuarios = listOf(
-            Triple("Borges@gmail.com", "1234", "motorista"),
-            Triple("Lucas@gmail.com", "admin", "admin")
+            UsuarioMockado("joao.silva@gmail.com", "1234", "motorista", "João"),
+            UsuarioMockado("carlos.lima@gmail.com", "admin", "admin", "Carlos")
         )
 
-        val usuarioValido = mockUsuarios.find { (login, senha, _) ->
+        val usuarioValido = mockUsuarios.find { (login, senha, _, _) ->
             emailInserido == login && senhaInserida == senha
         }
 
         if (usuarioValido != null) {
-            val (_, _, cargo) = usuarioValido
+            val (email, _, tipo, nome) = usuarioValido
+
+            // Salva no SharedPreferences
+            salvarUsuarioNoSharedPreferences(context, email, nome)
+
             isLoading.value = false
-            onSuccess(cargo) // "admin" ou "motorista"
+            onSuccess(tipo) // "admin" ou "motorista"
         } else {
             isLoading.value = false
             onError("Usuário ou senha inválidos")
         }
     }
 
+    private fun salvarUsuarioNoSharedPreferences(context: Context, email: String, nome: String) {
+        val sharedPref = context.getSharedPreferences("usuario_prefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("email", email)
+            putString("nome", nome)
+            apply()
+        }
+    }
+
     fun setErrorMessage(message: String) {
         errorMessage.value = message
     }
-
-
 }

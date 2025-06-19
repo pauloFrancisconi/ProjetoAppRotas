@@ -18,10 +18,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import com.example.projetoapprotas.util.obterUsuarioSalvo
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,9 +34,16 @@ fun TelaHomeMotorista(
     onPerfilClick: () -> Unit = {},
     onConfiguracoesClick: () -> Unit = {},
     onSobreClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {},
-    nomeMotorista: String = "João Silva"
+    onLogoutClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val nomeMotorista = remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        nomeMotorista.value = obterUsuarioSalvo(context)?.second ?: "Motorista"
+    }
+
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -49,7 +59,7 @@ fun TelaHomeMotorista(
         drawerState = drawerState,
         drawerContent = {
             DrawerContent(
-                nomeMotorista = nomeMotorista,
+                nomeMotorista = nomeMotorista.value,
                 onPerfilClick = {
                     scope.launch { drawerState.close() }
                     onPerfilClick()
@@ -106,9 +116,7 @@ fun TelaHomeMotorista(
                         }
                     },
                     actions = {
-                        IconButton(
-                            onClick = { /* Notificações */ }
-                        ) {
+                        IconButton(onClick = { /* Notificações */ }) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notificações"
@@ -135,14 +143,12 @@ fun TelaHomeMotorista(
                     )
                     .verticalScroll(rememberScrollState())
             ) {
-                // Header com saudação personalizada
                 HeaderSection(
                     greeting = greeting,
-                    nomeMotorista = nomeMotorista,
+                    nomeMotorista = nomeMotorista.value,
                     date = dateFormatted
                 )
 
-                // Cards principais
                 Column(
                     modifier = Modifier.padding(horizontal = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -151,10 +157,7 @@ fun TelaHomeMotorista(
                         title = "Rota do Dia",
                         description = "Visualize seus pontos de coleta e registre o progresso em tempo real",
                         icon = Icons.Default.Place,
-                        gradientColors = listOf(
-                            Color(0xFF4CAF50),
-                            Color(0xFF2E7D32)
-                        ),
+                        gradientColors = listOf(Color(0xFF4CAF50), Color(0xFF2E7D32)),
                         onClick = onRotaDiaClick
                     )
 
@@ -162,22 +165,18 @@ fun TelaHomeMotorista(
                         title = "Relatórios",
                         description = "Acesse histórico completo e análises das suas rotas realizadas",
                         icon = Icons.Default.Menu,
-                        gradientColors = listOf(
-                            Color(0xFF2196F3),
-                            Color(0xFF1565C0)
-                        ),
+                        gradientColors = listOf(Color(0xFF2196F3), Color(0xFF1565C0)),
                         onClick = onRelatoriosClick
                     )
                 }
 
-                // Cards de status e estatísticas
                 StatusSection()
-
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
 }
+
 
 @Composable
 fun DrawerContent(

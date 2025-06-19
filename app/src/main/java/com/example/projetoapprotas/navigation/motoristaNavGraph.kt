@@ -1,6 +1,8 @@
 package com.example.projetoapprotas.navigation
 
+import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -14,10 +16,12 @@ import com.example.projetoapprotas.ui.telas.motorista.TelaConfiguracoes
 import com.example.projetoapprotas.ui.telas.motorista.TelaSobre
 import com.example.projetoapprotas.ui.telas.motorista.TelaPerfilMotorista
 import com.example.projetoapprotas.ui.telas.motorista.TelaRelatoriosMotorista
+import androidx.core.content.edit
 
 fun NavGraphBuilder.motoristaNavGraph(navController: NavController) {
     navigation(startDestination = "motorista_home", route = "motorista") {
         composable("motorista_home") {
+            val context = LocalContext.current
             TelaHomeMotorista(
                 onRotaDiaClick = { navController.navigate("rota_do_dia") },
                 onRelatoriosClick = { navController.navigate("motorista_relatorios") },
@@ -25,6 +29,13 @@ fun NavGraphBuilder.motoristaNavGraph(navController: NavController) {
                 onConfiguracoesClick = { navController.navigate("motorista_configuracoes") },
                 onSobreClick = { navController.navigate("motorista_sobre") },
                 onLogoutClick = {
+                    // Limpar SharedPreferences
+                    context.getSharedPreferences("usuario_prefs", Context.MODE_PRIVATE) //context esta em vermelho
+                        .edit() {
+                            clear()
+                        }
+
+                    // Navegar para login limpando backstack
                     navController.navigate("login") {
                         popUpTo("motorista") { inclusive = true }
                     }
