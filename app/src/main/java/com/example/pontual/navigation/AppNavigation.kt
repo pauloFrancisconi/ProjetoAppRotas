@@ -23,6 +23,7 @@ sealed class Screen {
     object DeliveryForm : Screen()
     object AvailableRoutes : Screen()
     object MyRoute : Screen()
+    object CepLookup : Screen()
 }
 
 data class ScreenWithParams(
@@ -53,7 +54,8 @@ fun AppNavigation(
                 onNavigateToDrivers = { onNavigate(ScreenWithParams(Screen.Drivers)) },
                 onNavigateToDeliveries = { onNavigate(ScreenWithParams(Screen.Deliveries)) },
                 onNavigateToAvailableRoutes = { onNavigate(ScreenWithParams(Screen.AvailableRoutes)) },
-                onNavigateToMyRoute = { onNavigate(ScreenWithParams(Screen.MyRoute)) }
+                onNavigateToMyRoute = { onNavigate(ScreenWithParams(Screen.MyRoute)) },
+                onNavigateToCepLookup = { onNavigate(ScreenWithParams(Screen.CepLookup)) }
             )
         }
         
@@ -137,6 +139,12 @@ fun AppNavigation(
         
         is Screen.MyRoute -> {
             com.example.pontual.screens.MyRouteScreen(
+                onNavigateBack = onNavigateBack
+            )
+        }
+        
+        is Screen.CepLookup -> {
+            com.example.pontual.screens.CepLookupScreen(
                 onNavigateBack = onNavigateBack
             )
         }

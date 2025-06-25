@@ -32,6 +32,7 @@ fun HomeScreen(
     onNavigateToDeliveries: () -> Unit,
     onNavigateToAvailableRoutes: () -> Unit = {},
     onNavigateToMyRoute: () -> Unit = {},
+    onNavigateToCepLookup: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -163,6 +164,12 @@ fun HomeScreen(
                     text = "Entregas",
                     icon = Icons.Default.LocalShipping,
                     onClick = onNavigateToDeliveries
+                )
+                
+                MinimalActionButton(
+                    text = "Consultar CEP",
+                    icon = Icons.Default.Search,
+                    onClick = onNavigateToCepLookup
                 )
             } else {
                 MinimalActionButton(

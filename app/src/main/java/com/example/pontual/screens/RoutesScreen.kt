@@ -19,6 +19,9 @@ import com.example.pontual.components.EmptyStateScreen
 import com.example.pontual.components.PontualTopAppBar
 import com.example.pontual.components.TopAppBarAction
 import kotlinx.coroutines.launch
+import com.example.pontual.service.PdfService
+import com.example.pontual.PreferenceManager
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,7 +144,22 @@ fun RouteCard(
     modifier: Modifier = Modifier,
     isAdmin: Boolean = false
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var showDeleteDialog by remember { mutableStateOf(false) }
+    
+    suspend fun generateRoutePdf(route: Route) {
+        try {
+            val pdfService = PdfService()
+            val userName = PreferenceManager.getUserName(context) ?: "Usuário"
+            val pdfFile = pdfService.generateRoutePdf(context, route, userName)
+            
+            Toast.makeText(context, "PDF gerado com sucesso!", Toast.LENGTH_SHORT).show()
+            pdfService.shareOrOpenPdf(context, pdfFile)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Erro ao gerar PDF: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -208,6 +226,9 @@ fun RouteCard(
                 }
                 
                 Column {
+                    IconButton(onClick = { scope.launch { generateRoutePdf(route) } }) {
+                        Icon(Icons.Default.PictureAsPdf, contentDescription = "Gerar PDF")
+                    }
                     IconButton(onClick = onEdit) {
                         Icon(Icons.Default.Edit, contentDescription = "Editar")
                     }

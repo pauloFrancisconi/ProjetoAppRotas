@@ -34,6 +34,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.io.File
+import com.example.pontual.service.PdfService
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,6 +88,22 @@ fun MyRouteScreen(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
+        }
+    }
+    
+    suspend fun generateRoutePdf(route: Route, context: android.content.Context) {
+        try {
+            val pdfService = PdfService()
+            val userName = PreferenceManager.getUserName(context) ?: "Usuário"
+            val pdfFile = pdfService.generateRoutePdf(context, route, userName)
+            
+            // Mostrar mensagem de sucesso
+            Toast.makeText(context, "PDF gerado com sucesso!", Toast.LENGTH_SHORT).show()
+            
+            // Abrir o PDF
+            pdfService.shareOrOpenPdf(context, pdfFile)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Erro ao gerar PDF: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
     
@@ -152,6 +170,13 @@ fun MyRouteScreen(
                 onNavigateBack = onNavigateBack,
                 actions = {
                     if (route != null) {
+                        IconButton(onClick = { scope.launch { generateRoutePdf(route!!, context) } }) {
+                            Icon(
+                                imageVector = Icons.Default.PictureAsPdf,
+                                contentDescription = "Gerar PDF",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                         IconButton(
                             onClick = { 
                                 if (completedPointsCount >= route!!.points.size) {
